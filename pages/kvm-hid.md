@@ -20,6 +20,7 @@ While looking for solution on the internets i found [Samuel's blog](http://sholl
 
 * python 2.7 and 3.3+
 * socat
+* libvirt
 
 ### On Windows
 
@@ -34,12 +35,11 @@ I love python and this sounds like perfect project for it. Also [Samue's script]
 
 ```python
     #!/usr/bin/env python3
-
     import os
     import socketserver
     import subprocess
+    import socket
     from syslog import syslog
-
 
 
     def change_usb_state(vm, action, device):
@@ -61,21 +61,32 @@ I love python and this sounds like perfect project for it. Also [Samue's script]
         def handle(self):
             for line in self.rfile:
                 action_str = line.strip().decode("utf-8")
-                action = action_str.split(' ')
-                if len(action) == 3 and action[1] in ('attach', 'detach') and ':' in action[2]:
-                    if change_usb_state(*action):
-                        syslog("[VMusb] {} {}ed device {}".format(*action))
-                    else:
-                        syslog("[VMusb] {} {}ing device {} failed".format(*action))
+                vm_name, action, *devices = action_str.split(' ')
+                if len(action) >= 3 and action in ('attach', 'detach'):
+                    for device in devices:
+                        if change_usb_state(vm_name, action, device):
+                            syslog("[VMusb] {} {}ed device {}".format(vm_name, action, device))
+                        else:
+                            syslog("[VMusb] {} {}ing device {} failed".format(vm_name, action, device))
                 else:
                     syslog("[VMusb] invalid action: {}".format(action_str))
 
 
-    class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.UnixStreamServer):
+    class TCPServerPassive(socketserver.TCPServer):
+        def __init__(self, RequestHandlerClass):
+            super().__init__(None, RequestHandlerClass, bind_and_activate=False)
+            self.socket.close()
+            self.socket = socket.fromfd(3, socket.AF_INET, socket.SOCK_STREAM)
+
+
+    class ThreadedTCPServer(socketserver.ThreadingMixIn, TCPServerPassive):
         pass
 
-
-    ThreadedTCPServer('/var/run/vm-usbserver.sock', PCIHandler).serve_forever()
+    try:
+        ThreadedTCPServer(PCIHandler).serve_forever()
+    except OSError:
+        syslog("[VMusb] failed to start because it should be started by systemd")
+        exit(-1)
 
 ```
 
@@ -86,17 +97,30 @@ I chose to write this script for python3 because i have both versions installed 
 But if it does not run it is useless therefore we make it be systemd service. Create file `/etc/systemd/system/usbserver.service` with contents:
 
 ```ini
-[Unit]
-Description=VM HID usb server
+    [Unit]
+    Description=VM usbserver
 
-[Service]
-ExecStart=/usr/local/bin/usbserver
+    [Service]
+    ExecStart=/usr/local/bin/usbserver
 
-[Install]
-WantedBy=multi-user.target
+    [Install]
+    WantedBy=multi-user.target
 ```
 
-Do not forget to enable and start: `systemctl enable usbserver.service; systemctl start usbserver.service`.
+And socket file `/etc/systemd/system/usbserver.socket` with contents:
+
+```ini
+    [Unit]
+    Description=VM usbserver socket
+
+    [Socket]
+    ListenStream=/var/run/vm-usbserver.sock
+
+    [Install]
+    WantedBy=default.target
+```
+
+Do not forget to enable and start: `systemctl enable usbserver.socket; systemctl start usbserver.socket`. Result is socket-activated server that will start when you launch your first VM and it attempts to connect to `/var/run/vm-usbserver.sock`.
 
 ### The hotkey
 
@@ -114,11 +138,11 @@ But i have several virtual machines therefore i made a little bit more intellige
     from subprocess import Popen, PIPE, STDOUT
 
 
-    def attach_usb(name, usb_id, retry=5):
+    def attach_usb(name, usb_ids, retry=5):
         for i in range(retry):
             try:
                 p = Popen(['socat', '-', 'UNIX-CONNECT:/var/run/vm-usbserver.sock'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-                p.communicate(input='{} attach {}'.format(name, usb_id))
+                p.communicate(input='{} attach {}'.format(name, ' '.join(usb_ids)))
             except Exception as e:
                 logging.exception(e)
                 continue
@@ -144,11 +168,9 @@ But i have several virtual machines therefore i made a little bit more intellige
         if len(domains) > 0:
             dom0 = conn.lookupByID(domains[0])
             domain_name = dom0.name()
-            for hid_id in sys.argv[1:]:
-                attach_usb(domain_name, hid_id)
+            attach_usb(domain_name, sys.argv[1:])
         else:
             print('No online domains')
-
 ```
 
 Hint: To get `vendor:device` id do `lsusb`, its here: "Bus 004 Device 002: ID **045b:0210** Hitachi, Ltd"
