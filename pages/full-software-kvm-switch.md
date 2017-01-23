@@ -68,6 +68,10 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 			Option          "RegistryDwords" "RMUseSwI2c=0x01; RMI2cSpeed=100"
 	EndSection
 ```
+9. Run `sudo modprobe i2c-dev` to load required i2c module and create file `/etc/modules-load.d/i2c.conf` with a single line to automate module loading on boot:
+```
+i2c-dev
+```
 
 Host setup is done. Invoking `sudo vm-attach.sh attach` you should get your USB devices and monitor switched to a VM.
 
