@@ -6,7 +6,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 
 * sshd server on Linux host.
 * [ddccontrol](https://github.com/ddccontrol/)
-* [mControl](ttp://www.entechtaiwan.com/files/mc_setup.exe)
+* [mControl](http://www.entechtaiwan.com/files/mc_setup.exe)
 * [putty.exe](https://the.earth.li/~sgtatham/putty/latest/x86/putty.exe)
 * [puttygen.exe](https://the.earth.li/~sgtatham/putty/latest/x86/puttygen.exe)
 
