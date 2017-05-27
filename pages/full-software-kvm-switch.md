@@ -5,7 +5,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 ## Perquisites
 
 * sshd server on Linux host.
-* [ddccontrol](https://github.com/ddccontrol/)
+* [ddcutil](http://www.ddcutil.com/)
 * [mControl](http://www.entechtaiwan.com/files/mc_setup.exe)
 * [putty.exe](https://the.earth.li/~sgtatham/putty/latest/x86/putty.exe)
 * [puttygen.exe](https://the.earth.li/~sgtatham/putty/latest/x86/puttygen.exe)
@@ -16,7 +16,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 ```bash
 	#!/usr/bin/env bash
 
-	monitor=dev:/dev/i2c-1
+	monitor=1
 	output=3
 	devices=(1234:5678 9ABC:DEFG)
 	vmname=$(virsh list | sed -n '3p' | sed -nr 's/ *[0-9]+ +(.*) +running/\1/p')
@@ -43,7 +43,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 			do
 					attach_device "$vmname" $dev attach
 			done
-			ddccontrol -r 0x60 -w $output $monitor
+            ddcutil setvcp 60 $monitor --bus=$output
 	else
 			for dev in "${devices[@]}"
 			do
@@ -60,7 +60,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
     command="/usr/local/bin/vm-attach.sh detach",no-port-forwarding,no-x11-forwarding,no-agent-forwarding ssh-rsa AAAAB3N<.... rest of your extracted key>
 ```
 7. For a good measure do `chmod -R 600 /root/.ssh && chmod 700 /root/.ssh`.
-8. Nvidia users may need to create `/etc/X11/xorg.conf.d/20-nvidia-ddc.conf` that fixes i2c support (required for `ddccontrol`):
+8. Nvidia users may need to create `/etc/X11/xorg.conf.d/20-nvidia-ddc.conf` that fixes i2c support (required for `ddcutil`):
 ```
 	Section "Device"
 			Driver          "nvidia"
