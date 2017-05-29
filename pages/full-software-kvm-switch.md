@@ -12,7 +12,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 
 ## Host Setup
 
-1. Core of our setup is shell script attaching and detaching USB devices as well as controlling monitor input. Save script below to `/usr/local/bin/vm-detach.sh`
+1. Core of our setup is shell script attaching and detaching USB devices as well as controlling monitor input. Save script below to `/usr/local/bin/vm-attach.sh`
 ```bash
 	#!/usr/bin/env bash
 
@@ -53,8 +53,8 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 ```
 2. You will need to edit above script and replace `devices` array values with correct `vendor:product` ids from `lsusb`. You can add more than two devices. You can add devices that do not necessarily are connected - script will gracefully fail when they are missing and work when they are connected.
 3. Set `monitor` value to i2c device of your monitor you would like to switch. Set `output` value to correct output on your monitor. Setting these can be bit of trial and error. Out of 4 outputs on my monitor i can toggle between two - DVI and HDMI.
-4. Now make new ssh key with `ssh-keygen -t rsa -b 4096 -C "vm-detach"`.
-5. Extract public key with `ssh-keygen -y -f ~/.ssh/vm-detach.id_rsa`
+4. Now make new ssh key with `ssh-keygen -t rsa -b 4096 -C "vm-attach"`.
+5. Extract public key with `ssh-keygen -y -f ~/.ssh/vm-attach.id_rsa`
 6. Edit `/root/.ssh/authorized_keys` to contain:
 ```
     command="/usr/local/bin/vm-attach.sh detach",no-port-forwarding,no-x11-forwarding,no-agent-forwarding ssh-rsa AAAAB3N<.... rest of your extracted key>
@@ -80,12 +80,12 @@ Host setup is done. Invoking `sudo vm-attach.sh attach` you should get your USB 
 Since Windows is most common case that is what i will be detailing in this section. Besides if you got so far and you want same setup for linux setup will be pretty obvious to you anyway.
 
 1. Install `mControl`. For sake of simplicity i copied `mControl.exe` to documents folder where i placed other scripts though it is not necessary.
-2. Copy `vm-detach.id_rsa` from host to VM and use `puttygen.exe` to convert it to `vm-detach.ppk`.
-3. Create and save new connection using `putty.exe` to connect to `root@host_ip_addr`. Use `vm-detach.ppk` for auth. Save it with name `vm-detach`.
+2. Copy `vm-attach.id_rsa` from host to VM and use `puttygen.exe` to convert it to `vm-attach.ppk`.
+3. Create and save new connection using `putty.exe` to connect to `root@host_ip_addr`. Use `vm-attach.ppk` for auth. Save it with name `vm-attach`.
 4. Create powershell script `detach.ps1`. You may need to change `1` to reflect correct output used by host.
 ```ps
 C:\Users\User\Documents\mControl setcontrol 60 1	# Switches monitor output to slot 1
-C:\Users\User\Documents\putty -load vm-detach		# Executes vm-detach connection saved in putty
+C:\Users\User\Documents\putty -load vm-attach		# Executes vm-attach connection saved in putty
 ```
 
 And that's it. Running this script will first switch monitor output to the host and then execute `/usr/local/bin/vm-attach.sh detach` which should detach usb devices.
