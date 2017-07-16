@@ -97,7 +97,13 @@ def monkeypatch():
 
 
 if __name__ == '__main__':
+    async def other_asynchronous_code():
+        for i in range(5):
+            print(i)
+            await asyncio.sleep(1)
+
     async def asynchronous_code():
+        await asyncio.sleep(2)
         return 42
 
     def synchronous_code():
@@ -108,7 +114,6 @@ if __name__ == '__main__':
 
     monkeypatch()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(coroutine())
+    loop.run_until_complete(asyncio.gather(other_asynchronous_code(), coroutine()))
     loop.close()
 ```
-
