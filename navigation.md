@@ -1,4 +1,4 @@
-# Geeky things
+# Tech notebook
 
 
 <!--
