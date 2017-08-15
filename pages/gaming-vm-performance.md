@@ -19,7 +19,7 @@ Thanks to advances of QEMU and virtio nowdays it is very easy to set up a VM wit
 
 My goal was to allocate slice of my hardware to VM when it boots, and release these resources on VM shutdown so that host machine can run at full speed when needed. For that purpose i use libvirt hook script that does just that on machine boot. It also allcates required amount of hugepages and releases them when last VM needing hugepates shuts down. VM gets 4 cores, 8 threads and host has 2 cores, 4 threads. All tasks are migrated from VM cores to host cores so they do not interfere with applications VM is executing.
 
-### Configuration
+## Configuration
 
 First we have to set some variables in qemu hook script:
 
@@ -90,7 +90,7 @@ Also i should note that all of this is achieved using UEFI boot through ovmf fir
   </os>
 ```
 
-### Full scripts
+## Full scripts
 
 Script that orchestrates resource allocation and release. Change variables at start of the script as needed.
 
@@ -232,6 +232,6 @@ if __name__ == '__main__':
     sys.exit(-1)
 ```
 
-### Result
+## The Result
 
 Result is buttery-smooth Battlefield 1 experience reaching 144 FPS.
