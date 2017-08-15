@@ -235,3 +235,5 @@ if __name__ == '__main__':
 ## The Result
 
 Result is buttery-smooth Battlefield 1 experience reaching 144 FPS.
+
+[gimmick:Disqus](tech-notebook)

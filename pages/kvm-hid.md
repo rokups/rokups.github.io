@@ -219,3 +219,5 @@ And finally hotkey. I will use autohotkey to launch powershell script we just ma
 It binds to `Ctrl+PrintScreen`. I used same hotkey on the host. And we are done. With press of a button we can toggle USB devices of our choice between host and VM all without need of sacrificing entire USB controller.
 
 Cheers!
+
+[gimmick:Disqus](tech-notebook)
