@@ -1,3 +1,7 @@
+## Gaming VM performance
+
+Thanks to advances of QEMU and virtio nowdays it is very easy to set up a VM with dedicated GPU. Great times for Linux gamers. However many face another issue - poor VM performance. I spent many times gathering bits on the internet and came up with a solution that works for me. [Read More...](pages/gaming-vm-performance.md)
+
 ## Python3 asyncio - call async code from synchronous code
 
 Problem stems from the fact that while we can call `def` functions from `async def` functions, we can not do opposite. This essentially divides python code into two islands - async is land and synchronous one. Problems start to arise when we need to call async code from synchronous code which we do not control. [Read More...](pages/python3-asyncio-sync-async.md)
