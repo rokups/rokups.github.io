@@ -236,4 +236,49 @@ if __name__ == '__main__':
 
 Result is buttery-smooth Battlefield 1 experience reaching 144 FPS.
 
+## Update 1: cpuset patch
+
+I forgot to mention that i had to patch cpuset to make it work. Otherwise, at least on my machine, it fails when creating shield.
+
+```diff
+diff --git a/cpuset/commands/set.py b/cpuset/commands/set.py
+index 9205a07..e299d70 100644
+--- a/cpuset/commands/set.py
++++ b/cpuset/commands/set.py
+@@ -410,8 +410,8 @@ def modify(name, cpuspec=None, memspec=None, cx=None, mx=None):
+     log.debug('modifying cpuset "%s"', nset.name)
+     if cpuspec: nset.cpus = cpuspec
+     if memspec: nset.mems = memspec
+-    if cx: nset.cpu_exclusive = cx
+-    if mx: nset.mem_exclusive = mx
++    # if cx: nset.cpu_exclusive = cx
++    # if mx: nset.mem_exclusive = mx
+
+ def active(name):
+     """check that cpuset by name or cset is ready to be used"""
+diff --git a/cset b/cset
+index 9320532..83e4a0c 100755
+--- a/cset
++++ b/cset
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python2
+
+ __copyright__ = """
+ Copyright (C) 2007-2010 Novell Inc.
+diff --git a/setup.py b/setup.py
+index 5934cb0..54a2f18 100755
+--- a/setup.py
++++ b/setup.py
+@@ -10,7 +10,7 @@ setup(name = 'cpuset',
+     license = 'GPLv2',
+     author = 'Alex Tsariounov',
+     author_email = 'alext@novell.com',
+-    url = 'https://github.com/lpechacek/cpuset'
++    url = 'https://github.com/lpechacek/cpuset',
+     description = 'Allows manipluation of cpusets and provides higher level functions.',
+     long_description = \
+         'Cpuset is a Python application to make using the cpusets facilities in the Linux\n'
+```
+
 [gimmick:Disqus](tech-notebook)
