@@ -6,7 +6,7 @@ I already wrote on [Sharing HID devices with KVM virtual machine](#!pages/kvm-hi
 
 * sshd server on Linux host.
 * [ddcutil](http://www.ddcutil.com/)
-* [mControl](http://www.entechtaiwan.com/files/mc_setup.exe)
+* [ClickMonitorDDC](http://clickmonitorddc.bplaced.net/)
 * [putty.exe](https://the.earth.li/~sgtatham/putty/latest/x86/putty.exe)
 * [puttygen.exe](https://the.earth.li/~sgtatham/putty/latest/x86/puttygen.exe)
 
@@ -79,17 +79,40 @@ Host setup is done. Invoking `sudo vm-attach.sh attach` you should get your USB 
 
 Since Windows is most common case that is what i will be detailing in this section. Besides if you got so far and you want same setup for linux setup will be pretty obvious to you anyway.
 
-1. Install `mControl`. For sake of simplicity i copied `mControl.exe` to documents folder where i placed other scripts though it is not necessary.
+1. Install `ClickMonitorDDC`. For sake of simplicity i downloaded portable version and copied `ClickMonitorDDC_4_4.exe` to documents folder where i placed other scripts though it is not necessary.
 2. Copy `vm-attach.id_rsa` from host to VM and use `puttygen.exe` to convert it to `vm-attach.ppk`.
 3. Create and save new connection using `putty.exe` to connect to `root@host_ip_addr`. Use `vm-attach.ppk` for auth. Save it with name `vm-attach`.
 4. Create powershell script `detach.ps1`. You may need to change `1` to reflect correct output used by host.
 ```ps
-C:\Users\User\Documents\mControl setcontrol 60 1	# Switches monitor output to slot 1
-C:\Users\User\Documents\putty -load vm-attach		# Executes vm-attach connection saved in putty
+C:\Users\User\Documents\ClickMonitorDDC_4_4.exe s DisplayPort1	# Switches monitor output to one used by host
+C:\Users\User\Documents\putty -load vm-attach					# Executes vm-attach connection saved in putty
 ```
+
+You need to select correct monitor output. In my case it was `DisplayPort1` but in your case it may be different. Available outputs are displayed here:
+
+![](uploads/full-software-kvm-switch/monitor-outputs.png)
 
 And that's it. Running this script will first switch monitor output to the host and then execute `/usr/local/bin/vm-attach.sh detach` which should detach usb devices.
 
+## AutoHotkey script
+
+I use following AutoHotkey script. Just place it into same folder with `ClickMonitorDDC_4_4.exe` and `putty.exe`. It creates `ctrl+printscreen` binding for switching input and monitor to host and `shift+printscreen` for switching only input.
+```
+SendMode Input
+#SingleInstance Force
+#NoEnv
+Process, Priority,, High
+
+^PrintScreen::
+  Run nowindow.exe ClickMonitorDDC_4_4.exe s DisplayPort1
+  Run nowindow.exe putty.exe -load vm-detach
+  return
+
++PrintScreen::
+  Run nowindow.exe putty.exe -load vm-detach
+  return
+```
+
 ## Conclusion
 
-With bit of effort and right hardware we have achieved full software KVM switch. In [previous article](#!pages/kvm-hid.md) i mentioned binding these commands to hotkeys. Binding same hotkey on both host and VM gives perfect experience - as if you were toggling between two computers using KVM switch. Best part - this solution uses off-the-shelf parts (well maybe except for `mControl`) and is way simpler than previous attempt. Enjoy!
+With bit of effort and right hardware we have achieved full software KVM switch. In [previous article](#!pages/kvm-hid.md) i mentioned binding these commands to hotkeys. Binding same hotkey on both host and VM gives perfect experience - as if you were toggling between two computers using KVM switch. Best part - this solution uses off-the-shelf parts and is way simpler than previous attempt. Enjoy!
