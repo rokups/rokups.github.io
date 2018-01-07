@@ -280,5 +280,3 @@ index 5934cb0..54a2f18 100755
      long_description = \
          'Cpuset is a Python application to make using the cpusets facilities in the Linux\n'
 ```
-
-[gimmick:Disqus](tech-notebook)

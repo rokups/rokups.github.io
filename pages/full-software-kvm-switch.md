@@ -93,5 +93,3 @@ And that's it. Running this script will first switch monitor output to the host 
 ## Conclusion
 
 With bit of effort and right hardware we have achieved full software KVM switch. In [previous article](#!pages/kvm-hid.md) i mentioned binding these commands to hotkeys. Binding same hotkey on both host and VM gives perfect experience - as if you were toggling between two computers using KVM switch. Best part - this solution uses off-the-shelf parts (well maybe except for `mControl`) and is way simpler than previous attempt. Enjoy!
-
-[gimmick:Disqus](tech-notebook)

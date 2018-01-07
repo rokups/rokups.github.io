@@ -107,5 +107,3 @@ Be aware:
 * X Server configuration files must be in `/etc/X11/` directory.
 * `xinit /usr/bin/startkde -- :2 -xf86config 1080.conf vt2` is specific to my system. You may use binary of your demanding application in place of `/usr/bin/startkde`, or other virtual terminals, but you should change `vt2` accordingly (or maybe use `$XDG_VTNR` environment variable).
 * Input follows virtual terminal. In order to control your second desktop session you must be switched to virtual terminal that started this session.
-
-[gimmick:Disqus](tech-notebook)
