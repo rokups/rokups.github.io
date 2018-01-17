@@ -141,6 +141,7 @@ VM_HUGEPAGES_NEED=$(( $(./vm-mem-requirements $VM_NAME) / HUGEPAGES_SIZE ))
 
 if [[ $VM_ACTION == 'prepare' ]];
 then
+    sync
     echo 3 > /proc/sys/vm/drop_caches
     echo 1 > /proc/sys/vm/compact_memory
 
