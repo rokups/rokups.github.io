@@ -1,3 +1,7 @@
+## Memory-loaded python anywhere
+
+A while back whiff of inspiration led me to research interesting problem. I knew of [pupy](https://github.com/n1nj4sec/pupy/) for some time and there were things i did not like. Most unfortunate (mis)feature of `pupy` is depending on python 2.7 forever.. It is year 2017 and i am one of those people who constantly advocate switching to python 3. So i thought to myself - i can do better. Here is a method how to load a modern python (3.6+) interpreter all from memory, supporting native extensions and running on anything from Windows XP and up. [Read More...](pages/memory-loaded-python-anywhere.md)
+
 ## Gaming VM performance
 
 Thanks to advances of QEMU and virtio nowdays it is very easy to set up a VM with dedicated GPU. Great times for Linux gamers. However many face another issue - poor VM performance. I spent many times gathering bits on the internet and came up with a solution that works for me. [Read More...](pages/gaming-vm-performance.md)
