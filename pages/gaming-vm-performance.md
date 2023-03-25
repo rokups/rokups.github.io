@@ -101,6 +101,8 @@ Script that orchestrates resource allocation and release. Change variables at st
 # Based on Thomas Lindroth's shell script which sets up host for VM: http://sprunge.us/JUfS
 # put this script to /etc/libvirt/hooks/qemu
 
+# ideally also set the nohz_full=<$VIRT_CORES> kernel boot option to shield your VIRT_CORES from various kernel jobs (see https://www.suse.com/c/cpu-isolation-nohz_full-part-3/)
+
 TOTAL_CORES='0-11'
 TOTAL_CORES_MASK=FFF            # 0-11, bitmask 0b111111111111
 HOST_CORES='0-1,6-7'            # Cores reserved for host
@@ -115,14 +117,37 @@ VM_NAME=$1
 VM_ACTION=$2
 
 shield_vm() {
-    cset set -c $TOTAL_CORES -s machine.slice
     # Shield two cores cores for host and rest for VM(s)
-    cset shield --kthread on --cpu $VIRT_CORES
+    systemctl set-property --runtime machine.slice AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime init.scope AllowedCPUs=$HOST_CORES
+    systemctl set-property --runtime user.slice AllowedCPUs=$HOST_CORES
+    systemctl set-property --runtime system.slice AllowedCPUs=$HOST_CORES
+    # Migrate irqs to HOST_CORES (see https://www.suse.com/c/cpu-isolation-practical-example-part-5/)
+    for I in $(ls /proc/irq)
+    do
+        if [[ -d "/proc/irq/$I" ]]
+        then
+            echo "Affining vector $I to CPUs $HOST_CORES"
+            echo $HOST_CORES > /proc/irq/$I/smp_affinity_list
+        fi
+    done
+	>&2 echo "VMs Shielded"
 }
 
 unshield_vm() {
     echo $TOTAL_CORES_MASK > /sys/bus/workqueue/devices/writeback/cpumask
-    cset shield --reset
+    systemctl set-property --runtime machine.slice AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime init.scope AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime user.slice AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime system.slice AllowedCPUs=$TOTAL_CORES
+    for I in $(ls /proc/irq)
+    do
+        if [[ -d "/proc/irq/$I" ]]
+        then
+            echo "Affining vector $I to CPUs $TOTAL_CORES"
+            echo $TOTAL_CORES > /proc/irq/$I/smp_affinity_list
+        fi
+    done
 }
 
 # For manual invocation
